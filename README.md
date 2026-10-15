@@ -10,3 +10,4 @@ Lưu ý: Regression rất rõ ràng, nhiều dữ liệu bẩn và outlier. Cầ
 Tên đề tài: Used Car Price Prediction
 Trọng tâm: Regression + outlier + feature engineering
 Tracking tiến độ dự án trên Google Docs: [text](https://docs.google.com/spreadsheets/d/1ZfB9uXk-I4rVSL_V815VcoMajphkTzjhNLqRBgRabpI/edit?usp=sharing)
+hello world
