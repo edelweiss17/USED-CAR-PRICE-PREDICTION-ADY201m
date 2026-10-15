@@ -1,28 +1,21 @@
 /* =====================================================================
    01_cleaning.sql  -  T02 Cleaning (phan SQL, chay trong SSMS)
    Dau vao : bang cars_raw (import tu cars.csv, 15.000 dong)
-   Dau ra  : bang cars_clean
-   SQL lam : bo trung list_id, bo dong thieu gia/nam sx, doi gia sang trieu,
-             tinh tuoi xe, loc tin spam, tao co van ban, doi ma so sang chu,
-             chuan hoa ten tinh, bo ODO = 0 / thieu, bo trung xe.
-   Chay ca file bang F5 (nho chon database UsedCars).
+   Dau ra  : bang cars_clean (13.819 dong)
+   SQL lam : bo dong thieu gia / nam san xuat, doi gia sang trieu, tinh tuoi xe,
+             loc tin spam (cho thue, tim mua...), tao co van ban,
+             doi ma so sang chu, chuan hoa ten tinh,
+             bo ODO = 0 hoac thieu, bo trung xe.
+   Python lam tiep (cleaning_python.ipynb): loc ODO bat thuong theo km/nam,
+             xuat cars_cleaned.csv.
+   Cach chay: mo file trong SSMS, chon database UsedCars, bam F5.
    ===================================================================== */
-IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = N'UsedCars')
-BEGIN
-    CREATE DATABASE UsedCars;
-END;
-GO
 USE UsedCars;
-GO
 
 /* ---------- BUOC 1: tao cars_clean ---------- */
 DROP TABLE IF EXISTS cars_clean;
 
-WITH dedup AS (
-    SELECT *, ROW_NUMBER() OVER (PARTITION BY list_id ORDER BY list_id) AS rn
-    FROM cars_raw
-),
-base AS (
+WITH base AS (
     SELECT
         list_id, subject,
         CAST(price AS FLOAT) / 1000000.0 AS price_million,
@@ -51,9 +44,8 @@ base AS (
         TRY_CAST(TRY_CAST(carcolor  AS FLOAT) AS INT) AS carcolor_code,
         TRY_CAST(TRY_CAST(carorigin AS FLOAT) AS INT) AS carorigin_code,
         TRY_CAST(TRY_CAST(carseats  AS FLOAT) AS INT) AS carseats_code
-    FROM dedup
-    WHERE rn = 1
-      AND price IS NOT NULL
+    FROM cars_raw
+    WHERE price IS NOT NULL
       AND CAST(price AS FLOAT) >= 20000000
       AND TRY_CAST(mfdate AS INT) IS NOT NULL
       AND NOT (subject LIKE N'%cho thuê%' OR subject LIKE N'%thuê xe%' OR subject LIKE N'%tìm mua%'
@@ -64,6 +56,7 @@ SELECT
     list_id, subject, price_million, mfdate, car_age, odo_km,
     carbrand_name, carmodel_name, region_name, region_name_v3, area_name, ward_name, list_time,
     flag_chinh_chu, flag_bao_duong_hang,
+    /* Luu y: bang ma gearbox va carseats da doi chieu voi du lieu; fuel, cartype, carcolor, carorigin copy tu nhom khac, chua doi chieu */
     CASE gearbox_code WHEN 1 THEN N'Số tự động' WHEN 2 THEN N'Số sàn' WHEN 3 THEN N'Bán tự động' ELSE N'Unknown' END AS gearbox,
     CASE fuel_code WHEN 1 THEN N'Xăng' WHEN 2 THEN N'Dầu' WHEN 3 THEN N'Hybrid' WHEN 4 THEN N'Điện' ELSE N'Unknown' END AS fuel,
     CASE cartype_code WHEN 1 THEN N'Sedan' WHEN 2 THEN N'Coupe' WHEN 3 THEN N'SUV / Crossover' WHEN 4 THEN N'Hatchback'
@@ -94,8 +87,9 @@ SET region_name = CASE region_name
     WHEN N'Thừa Thiên Huế' THEN N'Thừa Thiên - Huế'
     ELSE region_name END;
 
-/* ---------- BUOC 3: bo ODO = 0 hoac thieu (khong dien, tranh nhieu du lieu) ---------- */
-DELETE FROM cars_clean WHERE odo_km IS NULL OR odo_km = 0;
+/* ---------- BUOC 3: bo ODO = 0 hoac thieu (coi la chua nhap, khong dien de tranh nhieu du lieu) ---------- */
+DELETE FROM cars_clean
+WHERE odo_km IS NULL OR odo_km = 0;
 
 /* ---------- BUOC 4: bo trung xe: cung hang, dong, nam, ODO, tinh, gia -> giu tin moi nhat ---------- */
 DECLARE @truoc INT = (SELECT COUNT(*) FROM cars_clean);
