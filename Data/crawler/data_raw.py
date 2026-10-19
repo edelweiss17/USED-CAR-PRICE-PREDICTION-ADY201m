@@ -34,14 +34,16 @@ PRICE_BOUNDS = [
     1_000_000_000,
     1_500_000_000,
     2_500_000_000,
-    1_000_000_000_000,
+    5_000_000_000,
+    10_000_000_000,
+    20_000_000_000,
 ]
 
 
 def load_crawled_ids(csv_file):
     seen_ids = set()
     if csv_file.exists() and csv_file.stat().st_size > 0:
-        with open(csv_file, mode="r", encoding="utf-8-sig") as f:
+        with open(csv_file, mode="r", encoding="utf-8-sig", newline="") as f:
             for row in csv.DictReader(f):
                 list_id = row.get("list_id")
                 if list_id:
@@ -58,7 +60,8 @@ def fetch_ads(session, params, max_retries=3):
             if res.status_code == 429:
                 time.sleep(15 * (attempt + 1))
                 continue
-        except requests.RequestException:
+            time.sleep(2 * (attempt + 1))
+        except (requests.RequestException, ValueError):
             time.sleep(2 * (attempt + 1))
     return [], ""
 
@@ -76,7 +79,8 @@ def parse_ad(ad, source_url):
 
 
 def crawl_price_range(session, low, high, seen_ids, writer, file_obj, target, delay):
-    price_range = f"{low}-{high - 1}"
+    upper = high if high == PRICE_BOUNDS[-1] else high - 1
+    price_range = f"{low}-{upper}"
     offset = 0
     stalled_count = 0
 
