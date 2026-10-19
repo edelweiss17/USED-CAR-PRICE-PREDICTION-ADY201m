@@ -1,10 +1,13 @@
 import argparse
 import csv
 import json
+from pathlib import Path
+import sys
 import time
 from datetime import datetime, timezone
-from pathlib import Path
 import requests
+
+sys.dont_write_bytecode = True
 
 ENDPOINT = "https://gateway.chotot.com/v1/public/ad-listing"
 
@@ -19,6 +22,7 @@ FIELDS = [
     "type", "status"
 ]
 
+# Chia khoang gia de khong bi vuot qua gioi han phan trang cua Cho Tot
 PRICE_BOUNDS = [
     0,
     100_000_000,
@@ -36,11 +40,11 @@ PRICE_BOUNDS = [
 
 
 def load_crawled_ids(csv_file):
+    # Doc id da co de tranh trung lap va cao tiep neu bi ngat
     seen_ids = set()
     if csv_file.exists() and csv_file.stat().st_size > 0:
         with open(csv_file, mode="r", encoding="utf-8-sig") as f:
-            reader = csv.DictReader(f)
-            for row in reader:
+            for row in csv.DictReader(f):
                 list_id = row.get("list_id")
                 if list_id:
                     seen_ids.add(str(list_id))
