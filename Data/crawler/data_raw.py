@@ -22,7 +22,6 @@ FIELDS = [
     "type", "status"
 ]
 
-# Chia khoang gia de khong bi vuot qua gioi han phan trang cua Cho Tot
 PRICE_BOUNDS = [
     0,
     100_000_000,
@@ -40,7 +39,6 @@ PRICE_BOUNDS = [
 
 
 def load_crawled_ids(csv_file):
-    # Doc id da co de tranh trung lap va cao tiep neu bi ngat
     seen_ids = set()
     if csv_file.exists() and csv_file.stat().st_size > 0:
         with open(csv_file, mode="r", encoding="utf-8-sig") as f:
