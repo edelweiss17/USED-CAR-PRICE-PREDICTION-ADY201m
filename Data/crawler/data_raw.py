@@ -79,7 +79,7 @@ def parse_ad(ad, source_url):
 
 
 def crawl_price_range(session, low, high, seen_ids, writer, file_obj, target, delay):
-    upper = high if high == PRICE_BOUNDS[-1] else high - 1
+    upper= high if high == PRICE_BOUNDS[-1] else high - 1
     price_range = f"{low}-{upper}"
     offset = 0
     stalled_count = 0
