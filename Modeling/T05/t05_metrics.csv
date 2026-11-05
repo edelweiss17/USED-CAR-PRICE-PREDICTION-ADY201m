@@ -1,0 +1,4 @@
+Mô hình / tập,R²,MAE (triệu),RMSE (triệu)
+Linear Regression - train,0.654,93.8,229.4
+Linear Regression - test,0.661,103.1,243.7
+Mốc đoán giá trung bình - test,-0.001,270.7,418.7
