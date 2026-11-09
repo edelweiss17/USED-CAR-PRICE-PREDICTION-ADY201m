@@ -6,8 +6,6 @@ import sys
 import time
 import requests
 
-sys.dont_write_bytecode = True
-
 ENDPOINT = "https://gateway.chotot.com/v1/public/ad-listing"
 
 FIELDS = [
