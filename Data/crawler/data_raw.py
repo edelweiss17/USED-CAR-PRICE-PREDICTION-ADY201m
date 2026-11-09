@@ -70,7 +70,6 @@ def crawl_price_range(session, low, high, seen_ids, writer, file_obj, delay):
     upper = high if high == PRICE_BOUNDS[-1] else high - 1
     price_range = f"{low}-{upper}"
     offset = 0
-    stalled_count = 0
 
     while True:
         params = {
@@ -98,13 +97,6 @@ def crawl_price_range(session, low, high, seen_ids, writer, file_obj, delay):
         file_obj.flush()
         offset += len(ads)
         print(f"Gia: {price_range} | Lay moi: {new_count} | Tong: {len(seen_ids)}")
-
-        if new_count == 0:
-            stalled_count += 1
-            if stalled_count >= 3:
-                break
-        else:
-            stalled_count = 0
 
         if len(ads) < 50:
             break
